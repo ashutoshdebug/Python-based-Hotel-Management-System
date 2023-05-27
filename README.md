@@ -8,9 +8,9 @@ Then, we can run Main Program.py. It has many features which are required to man
 I have used these modules in these files, so kindly ensure that you have all of these modules installed in your PC:
 
 mysqlconnector: Connects MySQL and Python and then we can use MySQL in python also. Module link: 
-pip install mysql-connector-python
+([pip install mysql-connector-python])
 
 tabulate: This module helps to showcase results in tabular form in python: 
-pip install tabulate 
+([pip install tabulate]) 
 
 For different types of table please refer this link: https://pypi.org/project/tabulate/
