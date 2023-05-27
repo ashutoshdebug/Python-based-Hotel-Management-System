@@ -1,5 +1,5 @@
 import mysql.connector as sql
-con=sql.connect(host='localhost', user='root', passwd='Ashutosh@3005')
+con=sql.connect(host='localhost', user='root', passwd='Your Password')
 b=con.cursor()
 
 def creation():
