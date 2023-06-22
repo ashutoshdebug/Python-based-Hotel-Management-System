@@ -16,4 +16,4 @@ tabulate: This module helps to showcase results in tabular form in python:
 Module link: 
 ```pip install tabulate``` 
 
-For different types of table please refer this link: https://pypi.org/project/tabulate/
+For different types of table please refer this link: ```https://pypi.org/project/tabulate/```
