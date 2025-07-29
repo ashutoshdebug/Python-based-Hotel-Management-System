@@ -1,19 +1,36 @@
-# Python based Hotel Management System
- This is a project made by me for service and room management in hotels. This is totally based on Python and SQL. I will try to add more functions to this later in the future
+# Hotel Management System
 
-First we need to create database and tables for to store our data, that's why we have to run Creating Database(Room_Managmenent_System).py. This will create required database and tables on our database server.
+A simple Python-based Room Management System that uses **MySQL** for backend data storage. This system allows you to:
 
-Then, we can run Main Program.py. It has many features which are required to manage a hotel. In future I will try to add some more feature. Till then, enjoy :)
+- Create and manage a hotel room database.
+- Add or delete tables and columns.
+- Check-in and check-out guests.
+- Manage guest details and billing.
+- Initialize discounts and services.
+- Add or delete individual table columns dynamically.
 
-I have used these modules in these files, so kindly ensure that you have all of these modules installed in your PC:
+---
 
-mysqlconnector: Connects MySQL and Python and then we can use MySQL in python also. 
+## Features
 
-Module link: 
-```pip install mysql-connector-python```
+- Create and drop the database `ROOM_MANAGEMENT_SYSTEM`
+- Create `CHECK_IN` and `CHECK_OUT` tables if they do not exist
+- Delete specific tables or the entire database
+- Add or delete columns dynamically from existing tables
+- Modular and OOP-based design
 
-tabulate: This module helps to showcase results in tabular form in python: 
-Module link: 
-```pip install tabulate``` 
+---
 
-For different types of table please refer this link: https://pypi.org/project/tabulate/#:~:text=M%20%2019%0A%2D%20%20%2D%20%20%2D%2D-,Table%20format,-There%20is%20more
+## Technologies Used
+
+- Python 3
+- MySQL (via `mysql-connector-python`)
+
+---
+
+## Setup Instructions
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/your-username/room-management-system.git
+cd room-management-system
