@@ -32,8 +32,7 @@ A simple Python-based Room Management System that uses **MySQL** for backend dat
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/your-username/room-management-system.git
-cd room-management-system
+git clone https://github.com/ashutoshdebug/Python-based-Hotel-Management-System
 ```
 
 ---
