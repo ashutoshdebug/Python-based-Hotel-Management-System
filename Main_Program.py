@@ -258,10 +258,10 @@ def discount():
         Helps to generate discount over the total bill of the guest
         """
         
-        bill_discount=int(input("Enter number of guest(s):"))
+        number_of_guest=int(input("Enter number of guest(s):"))
         cursor_var=con.cursor()
 
-        for i in range(bill_discount):
+        for i in range(number_of_guest):
                 aadhaar_card=input("Enter Aadhaar card number:")
                 total_bill=input("Enter amount:")
                 data=(total_bill,aadhaar_card)
