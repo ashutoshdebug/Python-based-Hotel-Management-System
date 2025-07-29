@@ -28,9 +28,32 @@ A simple Python-based Room Management System that uses **MySQL** for backend dat
 
 ---
 
+## Project structure
+room-management-system/
+│
+├── Main_Program.py                    # Main control file
+├── Create_database_Room_Managememt_System.py                 # Database creation file
+├── ReadMe.md         # Project overview
+
+---
 ## Setup Instructions
 
 ### 1. Clone the repository
 ```bash
 git clone https://github.com/your-username/room-management-system.git
 cd room-management-system
+
+---
+
+## Install dependencies 
+```bash
+pip install mysql-connector-python
+
+---
+
+## Run the program 
+```bash
+python main.py
+
+---
+
