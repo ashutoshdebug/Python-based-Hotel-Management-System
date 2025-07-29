@@ -28,14 +28,6 @@ A simple Python-based Room Management System that uses **MySQL** for backend dat
 
 ---
 
-## Project structure 
-room-management-system/
-│
-├── main.py                    # Main control file
-├── README.md                  # This file
-├── requirements.txt           # Python dependencies (optional)
-
----
 ## Setup Instructions
 
 ### 1. Clone the repository
