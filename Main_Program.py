@@ -1,455 +1,444 @@
-from tabulate import tabulate 
 import mysql.connector as sql
-con=sql.connect(host='localhost', user=input("Enter your account:"), passwd=input("Enter your password:"), database='ROOM_MANAGEMENT_SYSTEM', auth_plugin="mysql_native_password")
-print("                                                                     #___WELCOME_TO_QUADCORE_HOTELS___#                                      ")
+from mysql.connector import Error
+from tabulate import tabulate
+import os
+import subprocess
 
-def checkin():
-        """
-        Use to fill the data of a guest in the CHECK_IN table of the database.
-        """
-        guest=int(input("Enter number of guest(s):"))
-        cursor_var=con.cursor()
+try:
+    user_name = input("Enter your account:")
+    password= input("Enter your password:")
+    con = sql.connect(host = 'localhost', user = user_name, passwd = password, database = "ROOM_MANAGEMENT_SYSTEM")
+    
+    if con.is_connected():
+        print("Connection successful!")
+        cursor_var = con.cursor()
 
-        for i in range(guest):
-                type_of_room=input("Enter type of Room choosen:")
-                days=input("Enter number of day(s):")
-                name_of_guest=input("Enter Name(s) of guest(s):")
-                adhaar_card=input("Enter Aadhaar Card Number(s) of guest(s):")
-                mobile_no=input("Enter Mobile_No. of guest:")
-                date_of_checkin=input("Enter date of Check_In:")
-                alloted_room=input("Enter alloted Room_No:")
-                data=(type_of_room,days,name_of_guest,adhaar_card,mobile_no,date_of_checkin,alloted_room)
-                sql1='INSERT INTO CHECK_IN VALUES(%s,%s,%s,%s,%s,%s,%s)'
-                cursor_var.execute(sql1,data)
-        
-        con.commit()
-        print(" ")
-        print("Data entered successfully!!!")
-        
-        main()
+except Error as e:
+    print(f"Connection failed to MySQL: {e}")
 
-def detailsroom():
-        """
-        Showcase details of a guests using his/her alloted room number in CHECK_IN/CHECK_OUT table of database.
-        """
-        print(" ")
-        
-        had=['Credentials','Assigned_Task']
-        myd=[
-                ['Press 1','DETAILS FROM CHECK_IN'],
-                ['Press 2','DETAILS FROM CHECK_OUT']
+
+class GuestManagement:
+    """Managing guest data in Check In and Check Out tables"""
+    def __init__(self, connection):
+        self.connection = connection
+        self.cursor = self.connection.cursor()
+
+    def collect_checkin_info(self):
+        print("\n--- Guest Check-In ---")
+        type_of_room = input("Enter type of room chosen: ")
+        days = int(input("Enter number of day(s): "))
+        name = input("Enter name(s) of guest(s): ")
+        aadhaar = input("Enter Aadhaar card number(s): ")
+        mobile = input("Enter mobile number: ")
+        checkin_date = input("Enter date of check-in (YYYY-MM-DD): ")
+        room_no = input("Enter allotted room number: ")
+        return (type_of_room, days, name, aadhaar, mobile, checkin_date, room_no)
+
+    def insert_checkin(self, data):
+        sql = '''
+        INSERT INTO CHECK_IN 
+        (ROOM_TYPE, NO_OF_DAYS, NAME, AADHAAR_CARD_NO, MOBILE_NO, DATE, ROOM_NO)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        '''
+        self.cursor.execute(sql, data)
+
+    def check_in_guests(self):
+        try:
+            count = int(input("Enter number of guest(s) for check-in: "))
+            for _ in range(count):
+                guest_info = self.collect_checkin_info()
+                self.insert_checkin(guest_info)
+            self.connection.commit()
+            print("\nCheck-in data entered successfully!")
+        except Exception as e:
+            self.connection.rollback()
+            print(f"\nCheck-in error: {e}")
+
+    def collect_checkout_info(self):
+        print("\n--- Guest Check-Out ---")
+
+        head = ['Credentials', 'Room Type']
+        options = [
+            ['1', 'EXECUTIVE ROOM'],
+            ['2', 'DELUXE ROOM'],
+            ['3', 'SIMPLE_ROOM (WITH AC)'],
+            ['4', 'SIMPLE_ROOM (NON AC)']
         ]
-        print(tabulate(myd, headers=had, tablefmt='fancy_grid'))
+        print(tabulate(options, headers=head, tablefmt='fancy_grid'))
         print(" ")
-        print("*If you get empty table, then it means no matches found...")
-        
-        user_choice=int(input("Enter your choice:"))
-        cursor_var=con.cursor()
 
-        if user_choice==1:
-                alloted_room_no=input("Enter Room_No:")
-                cursor_var.execute("SELECT * FROM CHECK_IN WHERE ROOM_NO=%s",(alloted_room_no,))
-                data=cursor_var.fetchall()
-                head=['Room_Type','Day(s)','Name(s)','Aadhaar_Card_No.','Mobile_NO.','Date','Room_No.']
-                print(tabulate(data, headers=head, tablefmt='grid'))
-        
-        elif user_choice==2:
-                alloted_room_no=input("Enter Room_No:")
-                cursor_var.execute("SELECT * FROM CHECK_OUT WHERE ROOM_NO=%s",(alloted_room_no,))
-                data1=cursor_var.fetchall()
-                heads=['Room_Type','Room_No.','Name(s)','Mobile_No.','Aadhaar_Card_No.','No._of_day(s)','Total_bill','Date_of_billing']
-                print(tabulate(data1, headers=heads, tablefmt='grid' ))
-        
-        else: 
-                print("Wrong input...")
-        
-        main()
+        room_type_no = int(input("Enter room type number from the above table: "))
+        room_no = input("Enter Room number: ")
+        guest_count = int(input("Enter number of guest(s): "))
 
-def updatein():
-        """
-        This function updates the guest detail in the CHECK_IN table of database.
-        """
-        head=['Credentials','Column Name']
-        myd=[
-                ['Press 1','ROOM_TYPE'],
-                ['Press 2','NO_OF_DAYS'],
-                ['Press 3','NAME'],
-                ['Press 4','AADHAAR_CARD_NO'],
-                ['Press 5','MOBILE_NO'],
-                ['Press 6','DATE'],
-                ['Press 7','ROOM_NO']
-        ]
-        print(tabulate(myd, headers=head, tablefmt='fancy_grid'))
-        print(" ")
-        
-        user_choice=int(input("Enter your choice:"))
-        cursor_var=con.cursor()
-        
-        if user_choice==1:
-                room_type=input("Enter details after changing:")
-                mobile_no=input("Enter mobile number as a reference detail of guest:")
-                data1=(room_type,mobile_no)
-                sql1='UPDATE CHECK_IN SET ROOM_TYPE=%s WHERE MOBILE_NO=%s'
-                cursor_var.execute(sql1,data1)
-                print("Details update successfully!!!")
-        
-        elif user_choice==2:
-                no_of_days=input("Enter details after changing:")
-                mobile_no=input("Enter mobile number as a reference detail of guest:")
-                data2=(no_of_days,mobile_no)
-                sql2='UPDATE CHECK_IN SET NO_OF_DAYS=%s WHERE MOBILE_NO=%s'
-                cursor_var.execute(sql2,data2)
-                print("Details update successfully!!!")
-        
-        elif user_choice==3:
-                name_of_guest=input("Enter details after changing:")
-                mobile_no=input("Enter mobile number as a reference detail of guest:")
-                data3=(name_of_guest,mobile_no)
-                sql3='UPDATE CHECK_IN SET NAME=%s WHERE MOBILE_NO=%s'
-                cursor_var.execute(sql3,data3)
-                print("Details update successfully!!!")
-        
-        elif user_choice==4:
-                aadhaar_card=input("Enter details after changing:")
-                mobile_no=input("Enter mobile number as a reference detail of guest:")
-                data4=(aadhaar_card,mobile_no)
-                sql4='UPDATE CHECK_IN SET AADHAAR_CARD_NO=%s WHERE MOBILE_NO=%s'
-                cursor_var.execute(sql4,data4)
-                print("Details update successfully!!!")
-        
-        elif user_choice==5:
-                mobile_no=input("Enter details after changing:")
-                aadhaar_card=input("Enter aadhaar card number as a reference detail of guest:")
-                data5=(mobile_no,aadhaar_card)
-                sql5='UPDATE CHECK_IN SET MOBILE_NO=%s WHERE AADHAAR_CARD_NO=%s'
-                cursor_var.execute(sql5,data5)
-                print("Details update successfully!!!")
-        
-        elif user_choice==6:
-                date=input("Enter details after changing:")
-                mobile_no=input("Enter mobile number as a reference detail of guest:")
-                data6=(date,mobile_no)
-                sql6='UPDATE CHECK_IN SET DATE=%s WHERE MOBILE_NO=%s'
-                cursor_var.execute(sql6,data6)
-                print("Details update successfully!!!")
-        
-        elif user_choice==7:
-                room_no=input("Enter details after changing:")
-                mobile_no=input("Enter mobile number as a reference detail of guest:")
-                data7=(room_no,mobile_no)
-                sql7='UPDATE CHECK_IN SET ROOM_NO=%s WHERE MOBILE_NO=%s'
-                cursor_var.execute(sql7,data7)
-                print("Details update successfully!!!")
-        
-        else:
-                print("Wrong input")
-        
-        con.commit()
-        main()
+        room_rates = {
+            1: 5000,
+            2: 2500,
+            3: 1500,
+            4: 1000
+        }
+
+        all_checkout_data = []
+        total_fare = 0
+
+        for _ in range(guest_count):
+            type_of_room = input("Enter room type (by name): ")
+            name = input("Enter name of the guest: ")
+            mobile = input("Enter mobile number: ")
+            aadhaar = input("Enter Aadhaar card number: ")
+            days = int(input("Enter number of stay days: "))
+            billing_date = input("Enter billing date (YYYY-MM-DD): ")
+
+            rate_per_day = room_rates.get(room_type_no, 0)
+            fare = rate_per_day * days
+            total_fare += fare
+
+            data = (type_of_room, room_no, name, mobile, aadhaar, days, fare, billing_date)
+            all_checkout_data.append(data)
+
+        return all_checkout_data, total_fare
+
+    def insert_checkout(self, data_list):
+        sql = '''
+        INSERT INTO CHECK_OUT 
+        (ROOM_TYPE, ROOM_NO, NAME, MOBILE_NO, AADHAAR_CARD_NO, NO_OF_DAYS, TOTAL_BILL, DATE_OF_BILLING)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        '''
+        for data in data_list:
+            self.cursor.execute(sql, data)
+
+    def check_out_guests(self):
+        try:
+            all_checkout_data, total_fare = self.collect_checkout_info()
+            self.insert_checkout(all_checkout_data)
+            self.connection.commit()
+            print(f"\nTotal bill for guest(s): ₹{total_fare}")
+            print("Check-out data entered successfully!")
+        except Exception as e:
+            self.connection.rollback()
+            print(f"\nCheck-out error: {e}")
 
 
-def detailsname():
-        """
-        This function finds the detail of the person from CHECK_IN/CHECK_OUT table using name of the guest.
-        """
-        print(" ")
+class details:
+    """Fetching Guest(s) data from Check In and Check Out tables"""
+    def __init__(self, connection):
+        self.connection = connection
+        self.cursor = self.connection.cursor()
+        self.columns = {
+            'CHECK_IN': {
+                1: 'ROOM_TYPE',
+                2: 'NO_OF_DAYS',
+                3: 'NAME',
+                4: 'AADHAAR_CARD_NO',
+                5: 'MOBILE_NO',
+                6: 'DATE',
+                7: 'ROOM_NO'
+            },
+            'CHECK_OUT': {
+                1: 'ROOM_TYPE',
+                2: 'ROOM_NO',
+                3: 'NAME',
+                4: 'MOBILE_NO',
+                5: 'AADHAAR_CARD_NO',
+                6: 'NO_OF_DAYS',
+                7: 'TOTAL_BILL',
+                8: 'DATE_OF_BILLING'
+            }
+        }
+        self.table_map = {1: 'CHECK_IN', 2: 'CHECK_OUT'}
+
+    def collect_guest_info(self):
+        print("Select table to fetch data from:")
+        for num, name in self.table_map.items():
+            print(f"{num}. {name}")
         
-        had=['Credentials','Assigned_Task']
-        myd=[
-                ['Press 1','DETAILS FROM CHECK_IN'],
-                ['Press 2','DETAILS FROM CHECK_OUT']
-        ]
-        
-        print(tabulate(myd, headers=had, tablefmt='fancy_grid'))
-        print(" ")
-        print("*If you get empty table, then it means no matches found...")
-        
-        x=int(input("Enter your choice:"))
-        cursor_var=con.cursor()
-        
-        if x==1:
-                name_of_guest=input("Enter name of the guest:") 
-                cursor_var.execute("SELECT * FROM CHECK_IN WHERE NAME=%s",(name_of_guest,))
-                data=cursor_var.fetchall()
-                head=['Room_Type','Day(s)','Name(s)','Aadhaar_Card_No.','Mobile_No.','Date','Room_No.']
-                print(tabulate(data, headers=head, tablefmt='fancy_grid'))
-        
-        elif x==2:
-                name_of_guest=input("Enter name of the guest:")
-                cursor_var.execute("SELECT * FROM CHECK_OUT WHERE NAME=%s",(name_of_guest,))
-                data=cursor_var.fetchall()
-                heads=['Room_Type','Room_No.','Name(s)','Mobile_No.','Aadhaar_Card_No.','No._of_day(s)','Total_bill','Date_of_billing']
-                print(tabulate(data, headers=heads, tablefmt='grid'))
-        
-        else:
-                print("Wrong input...")
+        try:
+            table_choice = int(input("Enter table number (1 or 2): "))
+            table_name = self.table_map[table_choice]
+        except (ValueError, KeyError):
+            raise ValueError("Invalid table number. Please choose 1 for CHECK_IN or 2 for CHECK_OUT.")
+
+        column_dict = self.columns[table_name]
+
+        print("\nAvailable Columns:")
+        for num, col_name in column_dict.items():
+            print(f"{num}. {col_name}")
+
+        try:
+            col_choice = int(input("\nEnter the number corresponding to the column: "))
+            column_name = column_dict[col_choice]
+        except (ValueError, KeyError):
+            raise ValueError("Invalid column number selected.")
+
+        value = input(f"Enter your value for '{column_name}': ").strip()
+
+        return table_name, column_name, value
+
+    def insert_guest_info(self, table_name, column_name, value):
+        try:
+            column_dict = self.columns[table_name]
+            head = [column_dict[i] for i in sorted(column_dict.keys())]
+            sql = f"SELECT * FROM {table_name} WHERE {column_name} = %s"
+            self.cursor.execute(sql, (value,))
+            result = self.cursor.fetchall()
+
+            if result:
+                print("\nFetched Data:")
+                print(tabulate(result, headers=head, tablefmt='fancy_grid'))
                 
-        main()
+            else:
+                print("\nNo matching data found.")
 
-def calculator():
-        """
-        Opens the calculator in the program.
-        """
-        
-        import subprocess
-        subprocess.Popen('C:\\Windows\\System32\\calc.exe')
-        print("Opening calculator...")
-        main()
+        except Exception as e:
+            print(f"\nQuery failed! Error: {e}")
 
-def checkout():
-        """
-        Helps to fill out the details of a guest in CHECK_OUT table of database.
-        """
-        
-        room_no=int(input("Enter Room number:"))
-        print(" ")
-        
-        head=['Credentials','Assigned_Task']
-        myd=[
-                ['Press 1','EXECUTIVE ROOM'],
-                ['Press 2','DELUXE ROOM'],
-                ['Press 3','SIMPLE_ROOM(WITH AC)'],
-                ['Press 4','SIMPLE_ROOM(NON AC)']
-        ]
-        
-        print(tabulate(myd, headers=head, tablefmt='fancy_grid'))
-        print(" ")
-        
-        room_type_no=int(input("Enter type of Room from above table(in number):"))
-        guest=int(input("Enter number(s) of guest:"))
-        cursor_var=con.cursor()
-        
-        for i in range(guest):
-                type_of_room=input("Enter type of Room(in name):")
-                name_of_guest=input("Enter name of the guest:")
-                mob=int(input("Enter Mobile_no:"))
-                aadhaar_card=input("Enter Aadhar_Card_Number:")
-                days=int(input("Enter number of days:"))
-                billing_date=input("Enter date of billing:")
-                room1=5000
-                room2=2500
-                room3=1500
-                room4=1000
-                tyroom=0
-                if room_type_no==1:
-                        tyroom=room1
-                        fare=(guest*days*tyroom)
-                elif room_type_no==2:
-                        tyroom=room2
-                        fare=(guest*days*tyroom)
-                elif room_type_no==3:
-                        tyroom=room3
-                        fare=(guest*days*tyroom)
-                elif room_type_no==4:
-                        tyroom=room4
-                        fare=(guest*days*tyroom)
-                data=(type_of_room,room_no,name_of_guest,mob,aadhaar_card,days,fare,billing_date)
-                sql1='INSERT INTO CHECK_OUT VALUES(%s,%s,%s,%s,%s,%s,%s,%s)'
-                cursor_var.execute(sql1,data)
-        print(" ")
-        print("Total bill:Rs.",fare)
-        con.commit()
-        print(" ")
-        print("Data entered successfully!!!")
-        main()
+    def fetchdata(self):
+        try:
+            table_name, column_name, value = self.collect_guest_info()
+            self.insert_guest_info(table_name, column_name, value)
+            self.connection.commit()
+        except Exception as e:
+            self.connection.rollback()
+            print(f"\nError occurred: {e}")
 
-def discount():
-        """
-        Helps to generate discount over the total bill of the guest
-        """
-        
-        number_of_guest=int(input("Enter number of guest(s):"))
-        cursor_var=con.cursor()
 
-        for i in range(number_of_guest):
-                aadhaar_card=input("Enter Aadhaar card number:")
-                total_bill=input("Enter amount:")
-                data=(total_bill,aadhaar_card)
-                sql1='UPDATE CHECK_OUT SET TOTAL_BILL=TOTAL_BILL-%s WHERE AADHAAR_CARD_NO=%s'
-                cursor_var.execute(sql1,data)
-                print("Bill updated successfully!!!")
-        
-        con.commit()
-        main()
+class Updater:
+    """Updating Guest(s) data in Check In and Check Out table"""
+    def __init__(self, connection):
+        self.connection = connection
+        self.cursor = self.connection.cursor()
+        self.column_map = {
+            'CHECK_IN': {
+                1: 'ROOM_TYPE',
+                2: 'NO_OF_DAYS',
+                3: 'NAME',
+                4: 'AADHAAR_CARD_NO',
+                5: 'MOBILE_NO',
+                6: 'DATE',
+                7: 'ROOM_NO'
+            },
+            'CHECK_OUT': {
+                1: 'ROOM_TYPE',
+                2: 'ROOM_NO',
+                3: 'NAME',
+                4: 'MOBILE_NO',
+                5: 'AADHAAR_CARD_NO',
+                6: 'NO_OF_DAYS',
+                7: 'TOTAL_BILL',
+                8: 'DATE_OF_BILLING'
+            }
+        }
 
-def updateout():
-        """
-        Updates the details of a guest in CHECK_OUT table of database.
-        """
-        head=['Credentials','Column Name']
-        myd=[
-                ['Press 1','ROOM_TYPE'],
-                ['Press 2','ROOM_NO'],
-                ['Press 3','NAME'],
-                ['Press 4','MOBILE_NO'],
-                ['Press 5','AADHAAR_CARD_NO'],
-                ['Press 6','NO_OF_DAYS'],
-                ['Press 7','TOTAL_BILL'],
-                ['Press 8','DATE_OF_BILLING']
-        ]
-        print(tabulate(myd,headers=head, tablefmt='fancy_grid'))
-        print(" ")
-        
-        user_choice=int(input("Enter your choice:"))
-        cursor_var=con.cursor()
+    def update_field(self):
+        table_name = input("Enter table name (CHECK_IN or CHECK_OUT): ").strip().upper()
+        if table_name not in self.column_map:
+            print("Invalid table name.")
+            return
 
-        if user_choice==1:
-                room_type=input("Enter room type you want to change:")
-                mobile_no=input("Enter mobile number as a reference detail of guest:")
-                data1=(room_type,mobile_no)
-                sql1='UPDATE CHECK_OUT SET ROOM_TYPE=%s WHERE MOBILE_NO=%s'
-                cursor_var.execute(sql1,data1)
-                print("Room type updated successfully!!!")
-        
-        elif user_choice==2:
-                room_no=input("Enter room no. you want to change:")
-                mobile_no=input("Enter mobile number as a reference detail of guest:")
-                data2=(room_no,mobile_no)
-                sql2='UPDATE CHECK_OUT SET ROOM_NO=%s WHERE MOBILE_NO=%s'
-                cursor_var.execute(sql2,data2)
-                print("Room number updated successfully!!!")
-        
-        elif user_choice==3:
-                name_of_guest=input("Enter name of guest you want to change:")
-                mobile_no=input("Enter mobile number as a reference detail of guest:")
-                data3=(name_of_guest,mobile_no)
-                sql3='UPDATE CHECK_OUT SET NAME=%s WHERE MOBILE_NO=%s'
-                cursor_var.execute(sql3,data3)
-                print("Name of guest updated successfully!!!")
-        
-        elif user_choice==4:
-                mobile_no=input("Enter mobile number you want to change:")
-                aadhaar_card=input("Enter mobile Aadhaar Card number as a reference detail of guest:")
-                sql4='UPDATE CHECK_OUT SET MOBILE_NO=%s WHERE AADHAAR_CARD_NO=%s'
-                data4=(mobile_no,aadhaar_card)
-                cursor_var.execute(sql4,data4)
-                print("Mobile no. updated successfully!!!")
-        
-        elif user_choice==5:
-                aadhaar_card=input("Enter aadhaar card number change:")
-                mobile_no=input("Enter mobile number as a reference detail of guest:")
-                data5=(aadhaar_card,mobile_no)
-                sql5='UPDATE CHECK_OUT SET AADHAAR_CARD_NO=%s WHERE MOBILE_NO=%s'
-                cursor_var.execute(sql5,data5)
-                print("Aadhaar card number updated successfully!!!")
-        
-        elif user_choice==6:
-                no_of_days=input("Enter number of days you want to change:")
-                mobile_no=input("Enter mobile number as a reference detail of guest:")
-                data6=(no_of_days,mobile_no)
-                sql6='UPDATE CHECK_OUT SET NO_OF_DAYS=%s WHERE MOBILE_NO=%s'
-                cursor_var.execute(sql6,data6)
-                print("Number of days updated successfully!!!")
-        
-        elif user_choice==7:
-                total_bill=input("Enter total bill you want to change:")
-                mobile_no=input("Enter mobile number as a reference detail of guest:")
-                data7=(total_bill,mobile_no)
-                sql7='UPDATE CHECK_OUT SET TOTAL_BILL=%s WHERE MOBILE_NO=%s'
-                cursor_var.execute(sql7,data7)
-                print("Total bill updated successfully!!!")
-        
-        elif user_choice==8:
-                date_of_bill=input("Enter date of billing you want to change:")
-                mobile_no=input("Enter mobile number as a reference detail of guest:")
-                data8=(date_of_bill,mobile_no)
-                sql8='UPDATE CHECK_OUT SET DATE_OF_BILLING=%s WHERE MOBILE_NO=%s'
-                cursor_var.execute(sql8,data8)
-                print("Date of billing updated successfully!!!")
-        
+        columns = self.column_map[table_name]
+
+        print("\nSelect the column number you want to update:")
+        for key, value in columns.items():
+            print(f"{key}. {value}")
+        try:
+            col_choice = int(input("Enter your choice: ").strip())
+            column_to_update = columns.get(col_choice)
+            if not column_to_update:
+                print("Invalid column selection.")
+                return
+        except ValueError:
+            print("Invalid input.")
+            return
+
+        new_value = input(f"Enter the new value for {column_to_update}: ").strip()
+
+        print("\nSelect the reference column number (to locate the guest):")
+        for key, value in columns.items():
+            print(f"{key}. {value}")
+        try:
+            ref_choice = int(input("Enter your choice: ").strip())
+            reference_column = columns.get(ref_choice)
+            if not reference_column:
+                print("Invalid reference column selection.")
+                return
+        except ValueError:
+            print("Invalid input.")
+            return
+
+        reference_value = input(f"Enter the current value for {reference_column} to identify the record: ").strip()
+
+        try:
+            sql = f"UPDATE {table_name} SET {column_to_update} = %s WHERE {reference_column} = %s"
+            self.cursor.execute(sql, (new_value, reference_value))
+            if self.cursor.rowcount == 0:
+                print("No record found to update.")
+            else:
+                self.connection.commit()
+                print("\nRecord updated successfully!")
+        except Exception as e:
+            self.connection.rollback()
+            print(f"\nFailed to update record: {e}")
+
+
+
+class DeleteData:
+    """Deleting Guest(s) data from Check In and Check Out table"""
+    def __init__(self, connection):
+        self.connection = connection
+        self.cursor = self.connection.cursor()
+        self.columns_by_table = {
+            'CHECK_IN': {
+                1: 'ROOM_TYPE',
+                2: 'NO_OF_DAYS',
+                3: 'NAME',
+                4: 'AADHAAR_CARD_NO',
+                5: 'MOBILE_NO',
+                6: 'DATE',
+                7: 'ROOM_NO'
+            },
+            'CHECK_OUT': {
+                1: 'ROOM_TYPE',
+                2: 'ROOM_NO',
+                3: 'NAME',
+                4: 'MOBILE_NO',
+                5: 'AADHAAR_CARD_NO',
+                6: 'NO_OF_DAYS',
+                7: 'TOTAL_BILL',
+                8: 'DATE_OF_BILLING'
+            }
+        }
+
+    def select_table(self):
+        print("\nPress 1 for CHECK_IN table\nPress 2 for CHECK_OUT table\n")
+        table_choice = input("Enter your choice: ").strip()
+        if table_choice == '1':
+            return "CHECK_IN"
+        elif table_choice == '2':
+            return "CHECK_OUT"
         else:
-                print("Wrong input")
-        
-        con.commit()
-        main()
+            print("Invalid input!")
+            return None
 
-def rooms():
-        """
-        Shows types of the rooms availble in our hotel.
-        """
-        head=["Room_Type","Facilities","Cost(per day/guest)"]
-        mydata=[
+    def display_options(self, table_name):
+        columns = self.columns_by_table.get(table_name, {})
+        head = ['Press', 'Column Name']
+        table_data = [[key, value] for key, value in columns.items()]
+        print(tabulate(table_data, headers=head, tablefmt='fancy_grid'))
+        print(" ")
+        return columns
+
+    def delete_data(self):
+        table_name = self.select_table()
+        if not table_name:
+            return
+
+        columns = self.display_options(table_name)
+
+        try:
+            user_choice = int(input("Enter your choice for the column to match for deletion: "))
+            column_name = columns.get(user_choice)
+
+            if not column_name:
+                print("Invalid column choice!")
+                return
+
+            delete_value = input(f"Enter the value for {column_name}: ").strip()
+
+            if not column_name.isidentifier():
+                print("Invalid column name!")
+                return
+
+            sql = f"DELETE FROM {table_name} WHERE {column_name} = %s"
+            self.cursor.execute(sql, (delete_value,))
+            if self.cursor.rowcount == 0:
+                print("No matching record found.")
+            else:
+                self.connection.commit()
+                print("Data deleted successfully!")
+
+        except Exception as e:
+            self.connection.rollback()
+            print(f"Error: {e}")
+
+class DiscountInitializer:
+    """Inserting and updating the discount in Check Out table"""
+    def __init__(self, connection):
+        self.connection = connection
+        self.cursor = self.connection.cursor()
+        self.columns = {
+            1: 'ROOM_TYPE',
+                2: 'ROOM_NO',
+                3: 'NAME',
+                4: 'MOBILE_NO',
+                5: 'AADHAAR_CARD_NO',
+                6: 'NO_OF_DAYS',
+                7: 'TOTAL_BILL',
+                8: 'DATE_OF_BILLING'
+        }
+    
+    def column_options(self):
+        print("\nChoose the column for reference:")
+        for key, col in self.columns.items():
+            print(f"{key}.{col}")
+
+    def discount_amount(self):
+        inbill_dis = input("Enter the amount which needs to be deducted from the total bill:")
+
+        self.column_options()
+        col_key = int(input("Enter the number of the reference column:").strip())
+        reference_column = self.columns.get(col_key)
+        if not reference_column:
+            raise ValueError("Invalid column key selected.")
+
+        reference_value = input(f"Enter the value for {reference_column}: ").strip()
+        return inbill_dis, reference_column, reference_value
+    
+    def updatingdiscount(self):
+        try:
+            discount, column, value = self.discount_amount()
+            sql = f"UPDATE CHECK_OUT SET TOTAL_BILL = TOTAL_BILL - %s WHERE {column} = %s"
+            self.cursor.execute(sql, (discount, value))
+            self.connection.commit()
+            print("Discount applied successfully!")
+        except Exception as e:
+            self.connection.rollback()
+            print(f"Error applying discount: {e}")
+
+class calculator:
+    """Just opening calculator...."""
+    def __init__(self, connection):
+        self.connection = connection
+        self.cursor = self.connection.cursor()
+
+    def OpenCalc(self):
+        subprocess.Popen(['calc.exe'])
+        print("Opening calculator...")
+
+
+class RoomDetails:
+    """Showcasing different types of room and its details"""
+    def __init__(self, connection):
+        self.connection = connection
+        self.cursor =  self.connection.cursor()
+
+    def justprint(self):
+        head = ["Type of Room", "Facilities", "Cost(per day/guest)"]
+        roomdata = [
                 ['Executive Room','Wi-Fi, TV, Air Conditioner, Bathroom with Geyser, Tub and Jacuzzi, Breakfast,Lunch, Dinner','Rs.5000'],
                 ['Deluxe Room','Wi-Fi, TV, Air Conditioner, Bathroom with Tub and Geyser, Lunch, Dinner','Rs.2500'],
                 ['Normal Room(with AC)','Wi-Fi, TV, Air Conditioner, Bathroom with Geyser','Rs.1500'],
                 ['Normal Room(Non-AC)','Wi-Fi, TV, Bathroom with Geyser','Rs.1000']
         ]
-        print(tabulate(mydata, headers=head, tablefmt='fancy_grid'))
-        main()
 
-def deletionum():
-        """
-        Delets data of guests using his/her mobile number.
-        """        
-        print(" ")
-        head=['Credentials','Assigned_Task']
-        myd=[
-                ['Press 1','FROM CHECK_IN'],
-                ['Press 2','FROM CHECK_OUT']
-        ]
-        print(tabulate(myd, headers=head, tablefmt='grid'))
-        print(" ")
-        
-        user_choice=int(input("Enter your choice:"))
-        cursor_var=con.cursor()
+        print(tabulate(roomdata, headers=head, tablefmt='fancy_grid'))
 
-        if user_choice==1:
-                mobile_no=input("Enter Mobile Number:")
-                sql1='DELETE FROM CHECK_IN WHERE MOBILE_NO=%s'
-                cursor_var.execute(sql1,(mobile_no,))
-                print("Data deleted successfully!!!")
-        
-        elif user_choice==2:
-                mobile_no=input("Enter Mobile Number:")
-                sql1='DELETE FROM CHECK_OUT WHERE MOBILE_NO=%s'
-                cursor_var.execute(sql1,(mobile_no,))
-                print("Data deleted successfully!!!")
-        
-        else:
-                print("Wrong input...")
-        con.commit()
-        main()
+class Services:
+    """Showcasing all services available for Guests"""
+    def __init__(self, connection):
+        self.connection = connection
+        self.cursor = self.connection.cursor()
 
-def deletioncard():
-        """
-        Delets data of a guest using his/her aadhaar card number.
-        """
-        print(" ")
-        head=['Credentials','Assigned_Task']
-        myd=[
-                ['Press 1','FROM CHECK_IN'],
-                ['Press 2','FROM CHECK_OUT']
-        ]
-        print(tabulate(myd, headers=head, tablefmt='fancy_grid'))
-        print(" ")
-        
-        user_choice=int(input("Enter your choice:"))
-        cursor_var=con.cursor()
-        if user_choice==1:
-                aadhaar_card=input("Enter Card Number:")
-                sql1='DELETE FROM CHECK_IN WHERE AADHAAR_CARD_NO=%s'
-                cursor_var.execute(sql1,(aadhaar_card,))
-                print(" ")
-                print("Data deleted successfully!!!")
-
-        elif user_choice==2:
-                aadhaar_card=input("Enter Card Number:")
-                sql1='DELETE FROM CHECK_OUT WHERE AADHAAR_CARD_NO=%s'
-                cursor_var.execute(sql1,(aadhaar_card,))
-                print(" ")
-                print("Data deleted successfully!!!")
-        
-        else:
-                print("Wrong input...")
-
-        con.commit()
-        main()
-
-def services():
-        """
-        To showcase what services we offers to the guests.
-        """
-        print(" ")
+    def services(self):
         head=['Service','Phone_No.']
         myd=[
                 ['Room_Service','900'],
@@ -459,58 +448,70 @@ def services():
         ]
         print(tabulate(myd, headers=head, tablefmt='fancy_grid'))
         print(" ")
-        main()
 
 def main():
         """
         Main function for calling other functions of the programs
         """
         print(" ")
-        
-        head=['Credential','Assigned_Task']
+        while True:
+            head=['Credential','Assigned_Task']
 
-        myd=[
-                ['Press 1','FARE AND FACILITIES'],
-                ['Press 2','CHECK_IN PROMPT'],
-                ['Press 3','UPDATE_IN_CHECK_IN PROMPT'],
-                ['Press 4','DETAILS(VIA ROOM NUMBER) PROMPT'],
-                ['Press 5','DETAILS(VIA NAME) PROMPT'],
-                ['Press 6','OPEN CALCULATOR'],
-                ['Press 7','CHECK_OUT PROMPT'],
-                ['Press 8','UPDATEOUT PROMPT'],
-                ['Press 9','SERVICE CONTACT'],
-                ['Press 10','DISCOUNT'],
-                ['Press 11','DELETION_OF_DETAILS(MOBILE NUMBER)'],
-                ['Press 12','DELETION_OF_DETAILS(AADHAAR CARD)']
-        ]
-        print(tabulate(myd, headers=head, tablefmt='fancy_grid'))
-        print(" ")
-        user_choice=int(input("Enter PROMPT choice:"))
-        if user_choice==1:
-                rooms()
-        elif user_choice==2:
-                checkin()
-        elif user_choice==3:
-                updatein()
-        elif user_choice==4:
-                detailsroom()
-        elif user_choice==5:
-                detailsname()
-        elif user_choice==6:
-                calculator()
-        elif user_choice==7:
-                checkout()
-        elif user_choice==8:
-                updateout()
-        elif user_choice==9:
-                services()
-        elif user_choice==10:
-                discount()
-        elif user_choice==11:
-                deletionum()
-        elif user_choice==12:
-                deletioncard()
-        else:
-                print("WRONG INPUT... ENTER VALID CHOICE")
-        main()
-main()  
+            myd=[
+                ['Press 1','Check In'],
+                ['Press 2','Check Out'],
+                ['Press 3','Show Room Details'],
+                ['Press 4','Show Services'],
+                ['Press 5','Update Guest Info'],
+                ['Press 6','Search Guest'],
+                ['Press 7','Delete Guest Info'],
+                ['Press 8','Open Calculator'],
+                ['Press 9','Apply Discount'],
+                ['Press 10','Exit'],
+            ]
+            print(tabulate(myd, headers=head, tablefmt='fancy_grid'))
+            print(" ")
+            try:
+                choice = int(input("Enter your choice (1-10): "))
+            except ValueError:
+                print("Invalid input, please enter a number")
+                continue
+
+            if choice == 1:
+                gm = GuestManagement(con)
+                gm.check_in_guests()
+            elif choice == 2:
+                gm = GuestManagement(con)
+                gm.check_out_guests()
+            elif choice == 3:
+                rd = RoomDetails(con)
+                rd.justprint()
+            elif choice == 4:
+                svc = Services(con)
+                svc.services()
+            elif choice == 5:
+                updater = Updater(con)
+                updater.update_field()
+            elif choice == 6:
+                detail = details(con)
+                detail.fetchdata()
+            elif choice == 7:
+                deleter = DeleteData(con)
+                deleter.delete_data()
+            elif choice == 8:
+                calc = calculator(con)
+                calc.OpenCalc()
+            elif choice == 9:
+                discount = DiscountInitializer(con)
+                discount.updatingdiscount()
+            elif choice == 10:
+                print("Thank you for using the Room Management System.")
+                con.close()
+                break
+
+            else:
+                print("Invalid choice. Please try again.")
+            
+            input("\nPress Enter to continue...")
+            os.system('cls' if os.name == 'nt' else 'clear')
+main()
