@@ -17,7 +17,8 @@ DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = [
     "localhost",
-    "127.0.0.1"
+    "127.0.0.1",
+    "192.168.1.8"
 ]
 
 # Render deployment hostname
@@ -57,7 +58,9 @@ MIDDLEWARE = [
 
     # Required for Render static files
     'whitenoise.middleware.WhiteNoiseMiddleware',
-
+    # Uncomment  below middleware if you want auto-reload
+    'django_browser_reload.middleware.BrowserReloadMiddleware',
+    
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
