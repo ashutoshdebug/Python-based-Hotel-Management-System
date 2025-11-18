@@ -1,1 +1,1 @@
-web: gunicorn pbhms.wsgi
+web: gunicorn pbhms.wsgi:application
