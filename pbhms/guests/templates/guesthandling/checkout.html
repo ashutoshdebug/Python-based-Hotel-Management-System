@@ -48,8 +48,8 @@
           Fetch Details from the Check-Out DataBase
         </div>
         <div class="form-div w-full">
-          {% if form.errors %}
-          <div class="text-red-500 mb-4">{{ form.errors }}</div>
+          {% if form1.errors %}
+          <div class="text-red-500 mb-4">{{ form1.errors }}</div>
           {% endif %}
           <form method="GET" action="{% url 'guests:checkout' %}" class="w-full">
             <div class="flex flex-col border border-white p-4 rounded-2xl">
