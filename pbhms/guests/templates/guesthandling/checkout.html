@@ -82,7 +82,12 @@
             >
               Search
             </button>
-            <button type="submit" class="cursor-pointer p-1 w-1/2 bg-white hover:bg-gray-100 duration-300 font-medium text-black rounded-xl mt-4 {% if not guest %} opacity-50 cursor-not-allowed {% endif %}" onclick = window.location.href = "{% url 'guests:checkout' %}" {% if not guest %} disabled {% endif %}>
+            <button
+              type="button"
+              class="cursor-pointer p-1 w-1/2 bg-white hover:bg-gray-100 duration-300 font-medium text-black rounded-xl mt-4 {% if not guest %} opacity-50 cursor-not-allowed {% endif %}"
+              onclick="window.location.href='{% url 'guests:checkout' %}'"
+              {% if not guest %} disabled {% endif %}
+            >
               Clear
             </button>
             </div>
