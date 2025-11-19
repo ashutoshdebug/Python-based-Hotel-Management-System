@@ -59,7 +59,8 @@ MIDDLEWARE = [
     # Required for Render static files
     'whitenoise.middleware.WhiteNoiseMiddleware',
     # Uncomment  below middleware if you want auto-reload
-    'django_browser_reload.middleware.BrowserReloadMiddleware',
+    # Do not push django browser auto reload in production
+    # 'django_browser_reload.middleware.BrowserReloadMiddleware',
     
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
