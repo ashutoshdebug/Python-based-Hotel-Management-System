@@ -34,21 +34,112 @@ A complete Django-based Hotel Management System with guest management, room mana
 ### Project Structure
 ```bash
 pbhms/
-│── billing/
-│── dashboard/
-│── guests/
-│── rooms/
-│── services/
-│── static/
-│── templates/
-│── theme/
-│── manage.py
-│
-└── pbhms/
-    ├── settings.py
-    ├── urls.py
-    ├── wsgi.py
-    └── asgi.py
+    ├── billing/
+        ├── migrations/
+            └── migration files...
+        ├── templates/
+            └── billing.html
+        ├── __init__.py
+        ├── admin.py
+        ├── apps.py
+        ├── forms.py
+        ├── models.py
+        ├── tests.py
+        ├── urls.py
+        └── views.py
+    ├── dashboard/
+        ├── migrations/
+            └── migration files...
+        ├── templates/
+            └── dashboard.html
+        ├── __init__.py
+        ├── admin.py
+        ├── apps.py
+        ├── models.py
+        ├── tests.py
+        ├── urls.py
+        └── views.py
+    ├── guests/
+        ├── migrations/
+            └── migration files...
+        ├── templates/
+            ├── guesthandling/
+                ├── checkin.html
+                └── checkout.html
+            └── guests.html
+        ├── __init__.py
+        ├── admin.py
+        ├── apps.py
+        ├── forms.py
+        ├── models.py
+        ├── tests.py
+        ├── urls.py
+        └── views.py
+    ├── pbhms/
+        ├── __init__.py
+        ├── admin.py
+        ├── asgi.py
+        ├── settings.py
+        ├── urls.py
+        ├── views.py
+        └── wsgi.py
+    ├── rooms/
+        ├── migrations/
+            └── migration files...
+        ├── templates/
+            └── rooms.html
+        ├── __init__.py
+        ├── admin.py
+        ├── apps.py
+        ├── models.py
+        ├── tests.py
+        ├── urls.py
+        └── views.py
+    ├── services/
+        ├── migrations/
+            └── migration files...
+        ├── templates/
+            └── services.html
+        ├── __init__.py
+        ├── admin.py
+        ├── apps.py
+        ├── models.py
+        ├── tests.py
+        ├── urls.py
+        └── views.py
+    ├── static/
+        ├── css/
+            └── style.css
+        ├── img/
+            ├── AC.jpg
+            ├── deluxe.jpg
+            ├── Hero_img.png
+            ├── image.png
+            ├── Non-AC.jpg
+            └── suite.jpg
+        └── videos/
+            └── hero_video.mp4
+    ├── templates/
+        └── website/
+            └── index.html
+    ├── theme/
+        ├── static/
+            └── css/
+                └── dist/
+                    └── styles.css
+        ├── static_src/
+            ├── src/
+                └── styles.css
+            ├── .gitignore
+            ├── package-lock.json
+            ├── package.json
+            └── postcss.config.js
+        ├── templates/
+            └── base.html
+        ├── __init__.py
+        └── apps.py
+    ├── manage.py
+    └── requirements.txt
 ```
 
 - Standard Django project
