@@ -194,20 +194,10 @@ npm install
 npm run dev
 ```
 
-### Deployment (Render)
-Build Command:
-```bash
-cd pbhms && pip install -r ../requirements.txt && python manage.py collectstatic --noinput
-```
-
-Start Command:
-```bash
-cd pbhms && gunicorn pbhms.wsgi:application
-```
-
 ### Environment Variables
-- Key	Value
-- SECRET_KEY	(secure generated key)
-- DEBUG	False
-- RENDER	True
-- PYTHON_VERSION	3.12
+| Key | Value |
+|---|-------|
+| SECRET_KEY | (secure generated key)|
+| DEBUG | False |
+| RENDER | True |
+| PYTHON_VERSION | 3.12 |
